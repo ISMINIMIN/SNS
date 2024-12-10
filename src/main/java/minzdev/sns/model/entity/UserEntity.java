@@ -55,6 +55,7 @@ public class UserEntity {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(username);
         userEntity.setPassword(password);
+        userEntity.setRole(UserRole.USER);
 
         return userEntity;
     }
