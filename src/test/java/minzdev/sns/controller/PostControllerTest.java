@@ -1,7 +1,7 @@
 package minzdev.sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import minzdev.sns.controller.request.UserJoinRequest;
+import minzdev.sns.controller.request.PostCreateRequest;
 import minzdev.sns.service.PostService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ public class PostControllerTest {
 
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest(title, body))))
+                        .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body))))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -53,7 +53,7 @@ public class PostControllerTest {
 
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest(title, body))))
+                        .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body))))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
