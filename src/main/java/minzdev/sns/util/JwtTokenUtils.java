@@ -1,5 +1,6 @@
 package minzdev.sns.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -32,6 +33,19 @@ public class JwtTokenUtils {
                 .setExpiration(new Date(now.getTime() + accessTokenExpiredTimeMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String getUsername(String token) {
+        return extractClaims(token).get("username", String.class);
+    }
+
+    public boolean isExpired(String token) {
+        Date expiredDate = extractClaims(token).getExpiration();
+        return expiredDate.before(new Date());
+    }
+
+    public Claims extractClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
 }
