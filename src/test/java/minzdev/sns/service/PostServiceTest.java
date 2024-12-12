@@ -2,6 +2,8 @@ package minzdev.sns.service;
 
 import minzdev.sns.exception.ErrorCode;
 import minzdev.sns.exception.SnsApplicationException;
+import minzdev.sns.fixture.PostEntityFixture;
+import minzdev.sns.fixture.UserEntityFixture;
 import minzdev.sns.model.entity.PostEntity;
 import minzdev.sns.model.entity.UserEntity;
 import minzdev.sns.repository.PostEntityRepository;
@@ -58,6 +60,65 @@ public class PostServiceTest {
         );
 
         Assertions.assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void update_post_success() {
+        String title = "title";
+        String body = "body";
+        String username = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+        when(postEntityRepository.saveAndFlush(any())).thenReturn(postEntity);
+
+        Assertions.assertDoesNotThrow(() -> postService.update(title, body, username, postId));
+    }
+
+    @Test
+    @DisplayName("본인이 작성하지 않은 포스트를 수정할 수 없다.")
+    void update_post_error_not_owner() {
+        String title = "title";
+        String body = "body";
+        String username = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+        UserEntity owner = UserEntityFixture.get("owner-un", "owner-pw", 2);
+
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(owner));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
+
+        SnsApplicationException exception = Assertions.assertThrows(
+                SnsApplicationException.class, () -> postService.update(title, body, username, postId)
+        );
+
+        Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 포스트를 수정할 수 없다.")
+    void update_post_error_non_existent_post() {
+        String title = "title";
+        String body = "body";
+        String username = "username";
+        Integer postId = 1;
+
+        PostEntity postEntity = PostEntityFixture.get(username, postId, 1);
+        UserEntity userEntity = postEntity.getUser();
+
+        when(userEntityRepository.findByUsername(username)).thenReturn(Optional.of(userEntity));
+        when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
+
+        SnsApplicationException exception = Assertions.assertThrows(
+                SnsApplicationException.class, () -> postService.update(title, body, username, postId)
+        );
+
+        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, exception.getErrorCode());
     }
 
 }
