@@ -4,9 +4,9 @@ import minzdev.sns.model.entity.UserEntity;
 
 public class UserEntityFixture {
 
-    public static UserEntity get(String username, String password) {
+    public static UserEntity get(String username, String password, Integer userId) {
         UserEntity userEntityFixture = new UserEntity();
-        userEntityFixture.setId(1);
+        userEntityFixture.setId(userId);
         userEntityFixture.setUsername(username);
         userEntityFixture.setPassword(password);
 
