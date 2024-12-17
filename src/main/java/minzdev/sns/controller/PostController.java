@@ -7,6 +7,8 @@ import minzdev.sns.controller.response.PostResponse;
 import minzdev.sns.controller.response.Response;
 import minzdev.sns.model.dto.Post;
 import minzdev.sns.service.PostService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +35,16 @@ public class PostController {
     public Response<Void> delete(@PathVariable Integer postId, Authentication auth) {
         postService.delete(auth.getName(), postId);
         return Response.success();
+    }
+
+    @GetMapping
+    public Response<Page<PostResponse>> getAll(Pageable pageable, Authentication auth) {
+        return Response.success(postService.getAll(pageable).map(PostResponse::from));
+    }
+
+    @GetMapping("/my")
+    public Response<Page<PostResponse>> getMy(Pageable pageable, Authentication auth) {
+        return Response.success(postService.getMy(auth.getName(), pageable).map(PostResponse::from));
     }
 
 }
