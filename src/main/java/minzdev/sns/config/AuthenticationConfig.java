@@ -29,6 +29,7 @@ public class AuthenticationConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/*/users/join", "/api/*/users/login").permitAll()
                         .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
