@@ -61,7 +61,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 function Basic() {
-  const [userName, setUserName] = useState('');
+  const [username, serUsername] = useState('');
   const [password, setPassword] = useState('');
   const [open, setOpen] = React.useState(false);
   const [dialogTitle, setDialogTitle] = React.useState('');
@@ -83,14 +83,14 @@ function Basic() {
   };
 
   const handleSignIn = (event) => {
-    console.log(userName);
+    console.log(username);
     console.log(password);
 
     axios({
       url: '/api/v1/users/login',
       method: 'POST',
       data: {
-        name: userName,
+        username: username,
         password: password,
       },
     })
@@ -103,7 +103,7 @@ function Basic() {
         console.log(res.data.result.token);
       })
       .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
+        setDialogTitle(error.response.data.code);
         setDialogMessage(error.response.data.resultMessage);
         setOpen(true);
         console.log(error);
@@ -136,9 +136,9 @@ function Basic() {
                   <MDBox component="form" role="form">
                     <MDBox mb={2}>
                       <MDInput
-                        type="userName"
-                        label="User Name"
-                        onChange={(v) => setUserName(v.target.value)}
+                        type="username"
+                        label="Username"
+                        onChange={(v) => serUsername(v.target.value)}
                         fullWidth
                       />
                     </MDBox>
