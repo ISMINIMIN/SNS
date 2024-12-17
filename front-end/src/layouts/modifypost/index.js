@@ -92,7 +92,7 @@ function ModifyPost() {
         console.log('success');
       })
       .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
+        setDialogTitle(error.response.data.code);
         setDialogMessage(error.response.data.resultMessage);
         setOpen(true);
 

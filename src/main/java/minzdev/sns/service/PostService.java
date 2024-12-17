@@ -8,6 +8,8 @@ import minzdev.sns.model.entity.PostEntity;
 import minzdev.sns.model.entity.UserEntity;
 import minzdev.sns.repository.PostEntityRepository;
 import minzdev.sns.repository.UserEntityRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +58,18 @@ public class PostService {
         }
 
         postEntityRepository.delete(postEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Post> getAll(Pageable pageable) {
+        return postEntityRepository.findAll(pageable).map(Post::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Post> getMy(String username, Pageable pageable) {
+        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+        return postEntityRepository.findAllByUser(userEntity, pageable).map(Post::fromEntity);
     }
 
 }

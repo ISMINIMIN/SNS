@@ -52,7 +52,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 function Cover() {
-  const [userName, setUserName] = useState('');
+  const [username, serUsername] = useState('');
   const [password, setPassword] = useState('');
   const [open, setOpen] = React.useState(false);
   const [dialogTitle, setDialogTitle] = React.useState('');
@@ -67,14 +67,14 @@ function Cover() {
   };
 
   const handleSignUp = (event) => {
-    console.log(userName);
+    console.log(username);
     console.log(password);
 
     axios({
       url: '/api/v1/users/join',
       method: 'POST',
       data: {
-        name: userName,
+        username: username,
         password: password,
       },
     })
@@ -84,7 +84,7 @@ function Cover() {
         console.log('success');
       })
       .catch((error) => {
-        setDialogTitle(error.response.data.resultCode);
+        setDialogTitle(error.response.data.code);
         setDialogMessage(error.response.data.resultMessage);
         setOpen(true);
         console.log(error);
@@ -116,9 +116,9 @@ function Cover() {
                 <MDBox component="form" role="form">
                   <MDBox mb={2}>
                     <MDInput
-                      type="userName"
-                      label="User Name"
-                      onChange={(v) => setUserName(v.target.value)}
+                      type="username"
+                      label="Username"
+                      onChange={(v) => serUsername(v.target.value)}
                       fullWidth
                     />
                   </MDBox>
