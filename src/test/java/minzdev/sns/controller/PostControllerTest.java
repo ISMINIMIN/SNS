@@ -7,6 +7,7 @@ import minzdev.sns.exception.ErrorCode;
 import minzdev.sns.exception.SnsApplicationException;
 import minzdev.sns.fixture.PostEntityFixture;
 import minzdev.sns.model.dto.Post;
+import minzdev.sns.service.PostDetailService;
 import minzdev.sns.service.PostService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ public class PostControllerTest {
 
     @MockitoBean
     private PostService postService;
+
+    @MockitoBean
+    private PostDetailService postDetailService;
 
     @Test
     @WithMockUser
@@ -219,6 +223,37 @@ public class PostControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void post_like_success() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/likes")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("로그인 하지 않으면 좋아요 기능을 이용할 수 없다.")
+    void post_like_error_do_not_login() throws Exception {
+        mockMvc.perform(post("/api/v1/posts/1/likes")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("존재하지 않는 포스트에 좋아요를 할 수 없다.")
+    void post_like_error_non_existent_post() throws Exception {
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postDetailService).like(any(), any());
+
+        mockMvc.perform(post("/api/v1/posts/1/likes")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
 }

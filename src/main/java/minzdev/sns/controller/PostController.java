@@ -6,6 +6,7 @@ import minzdev.sns.controller.request.PostUpdateRequest;
 import minzdev.sns.controller.response.PostResponse;
 import minzdev.sns.controller.response.Response;
 import minzdev.sns.model.dto.Post;
+import minzdev.sns.service.PostDetailService;
 import minzdev.sns.service.PostService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private final PostDetailService postDetailService;
 
     @PostMapping
     public Response<Void> create(@RequestBody PostCreateRequest request, Authentication auth) {
@@ -45,6 +47,17 @@ public class PostController {
     @GetMapping("/my")
     public Response<Page<PostResponse>> getMy(Pageable pageable, Authentication auth) {
         return Response.success(postService.getMy(auth.getName(), pageable).map(PostResponse::from));
+    }
+
+    @PostMapping("/{postId}/likes")
+    public Response<Void> like(@PathVariable Integer postId, Authentication auth) {
+        postDetailService.like(postId, auth.getName());
+        return Response.success();
+    }
+
+    @GetMapping("/{postId}/likes")
+    public Response<Integer> countLike(@PathVariable Integer postId, Authentication auth) {
+        return Response.success(postDetailService.countLike(postId));
     }
 
 }
