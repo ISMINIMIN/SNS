@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class PostResponse {
 
     private Integer id;
-    private  String title;
+    private String title;
     private String body;
     private UserResponse user;
     private Timestamp createdAt;

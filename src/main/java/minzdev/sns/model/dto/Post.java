@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class Post {
 
     private Integer id;
-    private  String title;
+    private String title;
     private String body;
     private User user;
     private Timestamp createdAt;
