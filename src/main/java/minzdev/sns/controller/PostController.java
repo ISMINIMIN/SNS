@@ -1,8 +1,10 @@
 package minzdev.sns.controller;
 
 import lombok.AllArgsConstructor;
+import minzdev.sns.controller.request.CommentCreateRequest;
 import minzdev.sns.controller.request.PostCreateRequest;
 import minzdev.sns.controller.request.PostUpdateRequest;
+import minzdev.sns.controller.response.CommentResponse;
 import minzdev.sns.controller.response.PostResponse;
 import minzdev.sns.controller.response.Response;
 import minzdev.sns.model.dto.Post;
@@ -58,6 +60,17 @@ public class PostController {
     @GetMapping("/{postId}/likes")
     public Response<Integer> countLike(@PathVariable Integer postId, Authentication auth) {
         return Response.success(postDetailService.countLike(postId));
+    }
+
+    @PostMapping("/{postId}/comments")
+    public Response<Void> createComment(@PathVariable Integer postId, @RequestBody CommentCreateRequest request, Authentication auth) {
+        postDetailService.createComment(postId, request.getComment(), auth.getName());
+        return Response.success();
+    }
+
+    @GetMapping("/{postId}/comments")
+    public Response<Page<CommentResponse>> createComment(@PathVariable Integer postId, Pageable pageable, Authentication auth) {
+        return Response.success(postDetailService.getComments(postId, pageable).map(CommentResponse::from));
     }
 
 }
