@@ -7,7 +7,6 @@ import minzdev.sns.model.dto.Post;
 import minzdev.sns.model.entity.PostEntity;
 import minzdev.sns.model.entity.UserEntity;
 import minzdev.sns.repository.PostEntityRepository;
-import minzdev.sns.repository.UserEntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,22 +16,20 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class PostService {
 
+    private final UserService userService;
+
     private final PostEntityRepository postEntityRepository;
-    private final UserEntityRepository userEntityRepository;
 
     @Transactional
     public void create(String title, String body, String username) {
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+        UserEntity userEntity = userService.findByUsername(username);
         postEntityRepository.save(PostEntity.of(title, body, userEntity));
     }
 
     @Transactional
     public Post update(String title, String body, String username, Integer postId) {
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        UserEntity userEntity = userService.findByUsername(username);
+        PostEntity postEntity = findById(postId);
 
         // 권한 체크
         if(postEntity.getUser() != userEntity) {
@@ -47,10 +44,8 @@ public class PostService {
 
     @Transactional
     public void delete(String username, Integer postId) {
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        UserEntity userEntity = userService.findByUsername(username);
+        PostEntity postEntity = findById(postId);
 
         // 권한 체크
         if(postEntity.getUser() != userEntity) {
@@ -67,9 +62,13 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<Post> getMy(String username, Pageable pageable) {
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+        UserEntity userEntity = userService.findByUsername(username);
         return postEntityRepository.findAllByUser(userEntity, pageable).map(Post::fromEntity);
+    }
+
+    public PostEntity findById(Integer postId) {
+        return postEntityRepository.findById(postId).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
     }
 
 }
