@@ -31,7 +31,6 @@ public class PostService {
         UserEntity userEntity = userService.findByUsername(username);
         PostEntity postEntity = findById(postId);
 
-        // 권한 체크
         if(postEntity.getUser() != userEntity) {
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", username, postId));
         }
@@ -47,7 +46,6 @@ public class PostService {
         UserEntity userEntity = userService.findByUsername(username);
         PostEntity postEntity = findById(postId);
 
-        // 권한 체크
         if(postEntity.getUser() != userEntity) {
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", username, postId));
         }
