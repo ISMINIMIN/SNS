@@ -1,6 +1,7 @@
 package minzdev.sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import minzdev.sns.controller.request.CommentCreateRequest;
 import minzdev.sns.controller.request.PostCreateRequest;
 import minzdev.sns.controller.request.PostUpdateRequest;
 import minzdev.sns.exception.ErrorCode;
@@ -252,6 +253,47 @@ public class PostControllerTest {
 
         mockMvc.perform(post("/api/v1/posts/1/likes")
                         .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void create_comment_success() throws Exception {
+        String comment = "comment";
+
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new CommentCreateRequest(comment))))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("로그인 하지 않으면 댓글을 작성할 수 없다.")
+    void create_comment_error_do_not_login() throws Exception {
+        String comment = "comment";
+
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new CommentCreateRequest(comment))))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("존재하지 않는 포스트에 댓글을 작성할 수 없다.")
+    void create_comment_error_non_existent_post() throws Exception {
+        String comment = "comment";
+
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND))
+                .when(postDetailService).createComment(any(), comment, any());
+
+        mockMvc.perform(post("/api/v1/posts/1/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new CommentCreateRequest(comment))))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
