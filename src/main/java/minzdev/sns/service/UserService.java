@@ -27,17 +27,13 @@ public class UserService {
                     ErrorCode.DUPLICATED_USER_NAME, String.format("%s is duplicated", username));
         });
 
-        // 회원가입 진행 (user 등록)
         UserEntity userEntity = userEntityRepository.save(UserEntity.of(username, passwordEncoder.encode(password)));
 
         return User.fromEntity(userEntity);
     }
 
     public String login(String username, String password) {
-        // 회원가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username))
-        );
+        UserEntity userEntity = findByUsername(username);
 
         // 비밀번호 일치 여부 체크
         if(!passwordEncoder.matches(password, userEntity.getPassword())) {
@@ -49,6 +45,11 @@ public class UserService {
 
     public User loadUserByUsername(String username) {
         return userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+    }
+
+    public UserEntity findByUsername(String username) {
+        return userEntityRepository.findByUsername(username).orElseThrow(() ->
                 new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
     }
 

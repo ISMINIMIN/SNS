@@ -1,8 +1,6 @@
 package minzdev.sns.service;
 
 import lombok.AllArgsConstructor;
-import minzdev.sns.exception.ErrorCode;
-import minzdev.sns.exception.SnsApplicationException;
 import minzdev.sns.model.dto.Comment;
 import minzdev.sns.model.entity.CommentEntity;
 import minzdev.sns.model.entity.LikeEntity;
@@ -10,8 +8,6 @@ import minzdev.sns.model.entity.PostEntity;
 import minzdev.sns.model.entity.UserEntity;
 import minzdev.sns.repository.CommentEntityRepository;
 import minzdev.sns.repository.LikeEntityRepository;
-import minzdev.sns.repository.PostEntityRepository;
-import minzdev.sns.repository.UserEntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,17 +19,16 @@ import java.util.Optional;
 @AllArgsConstructor
 public class PostDetailService {
 
-    private final PostEntityRepository postEntityRepository;
-    private final UserEntityRepository userEntityRepository;
+    private final UserService userService;
+    private final PostService postService;
+
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
 
     @Transactional
     public void like(Integer postId, String username) {
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        UserEntity userEntity = userService.findByUsername(username);
+        PostEntity postEntity = postService.findById(postId);
 
         Optional<LikeEntity> likeEntity = likeEntityRepository.findByUserAndPost(userEntity, postEntity);
 
@@ -43,25 +38,21 @@ public class PostDetailService {
 
     @Transactional
     public int countLike(Integer postId) {
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = postService.findById(postId);
         return likeEntityRepository.countByPost(postEntity);
     }
 
     @Transactional
     public void createComment(Integer postId, String comment, String username) {
-        UserEntity userEntity = userEntityRepository.findByUsername(username).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        UserEntity userEntity = userService.findByUsername(username);
+        PostEntity postEntity = postService.findById(postId);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
     }
 
     @Transactional(readOnly = true)
     public Page<Comment> getComments(Integer postId, Pageable pageable) {
-        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        PostEntity postEntity = postService.findById(postId);
         return commentEntityRepository.findAllByPost(postEntity, pageable).map(Comment::fromEntity);
     }
 

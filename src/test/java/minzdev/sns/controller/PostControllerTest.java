@@ -289,7 +289,7 @@ public class PostControllerTest {
         String comment = "comment";
 
         doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND))
-                .when(postDetailService).createComment(any(), comment, any());
+                .when(postDetailService).createComment(any(), any(), any());
 
         mockMvc.perform(post("/api/v1/posts/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
