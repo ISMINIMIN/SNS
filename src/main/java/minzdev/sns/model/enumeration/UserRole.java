@@ -1,9 +1,8 @@
-package minzdev.sns.model.dto;
+package minzdev.sns.model.enumeration;
 
 public enum UserRole {
 
     ADMIN,
     USER
-    ;
 
 }

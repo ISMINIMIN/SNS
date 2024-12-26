@@ -3,7 +3,7 @@ package minzdev.sns.controller.response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import minzdev.sns.model.dto.User;
-import minzdev.sns.model.dto.UserRole;
+import minzdev.sns.model.enumeration.UserRole;
 
 @Getter
 @AllArgsConstructor

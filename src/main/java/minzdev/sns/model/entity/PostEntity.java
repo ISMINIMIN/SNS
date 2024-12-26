@@ -3,7 +3,6 @@ package minzdev.sns.model.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import minzdev.sns.model.dto.UserRole;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
