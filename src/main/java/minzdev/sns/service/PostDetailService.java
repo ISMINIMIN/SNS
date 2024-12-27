@@ -2,10 +2,9 @@ package minzdev.sns.service;
 
 import lombok.AllArgsConstructor;
 import minzdev.sns.model.dto.Comment;
-import minzdev.sns.model.entity.CommentEntity;
-import minzdev.sns.model.entity.LikeEntity;
-import minzdev.sns.model.entity.PostEntity;
-import minzdev.sns.model.entity.UserEntity;
+import minzdev.sns.model.entity.*;
+import minzdev.sns.model.enumeration.AlarmType;
+import minzdev.sns.repository.AlarmEntityRepository;
 import minzdev.sns.repository.CommentEntityRepository;
 import minzdev.sns.repository.LikeEntityRepository;
 import org.springframework.data.domain.Page;
@@ -24,6 +23,7 @@ public class PostDetailService {
 
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
 
     @Transactional
     public void like(Integer postId, String username) {
@@ -32,8 +32,14 @@ public class PostDetailService {
 
         Optional<LikeEntity> likeEntity = likeEntityRepository.findByUserAndPost(userEntity, postEntity);
 
-        if(likeEntity.isPresent()) likeEntityRepository.delete(likeEntity.get());
-        else likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
+        if(likeEntity.isPresent()) {
+            likeEntityRepository.delete(likeEntity.get());
+        } else {
+            likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
+            alarmEntityRepository.save(AlarmEntity.of(
+                    postEntity.getUser(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())
+            ));
+        }
     }
 
     @Transactional
@@ -48,6 +54,9 @@ public class PostDetailService {
         PostEntity postEntity = postService.findById(postId);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
+        alarmEntityRepository.save(AlarmEntity.of(
+                postEntity.getUser(), AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())
+        ));
     }
 
     @Transactional(readOnly = true)

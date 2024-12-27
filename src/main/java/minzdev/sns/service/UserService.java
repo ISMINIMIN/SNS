@@ -3,10 +3,14 @@ package minzdev.sns.service;
 import lombok.AllArgsConstructor;
 import minzdev.sns.exception.ErrorCode;
 import minzdev.sns.exception.SnsApplicationException;
+import minzdev.sns.model.dto.Alarm;
 import minzdev.sns.model.dto.User;
 import minzdev.sns.model.entity.UserEntity;
+import minzdev.sns.repository.AlarmEntityRepository;
 import minzdev.sns.repository.UserEntityRepository;
 import minzdev.sns.util.JwtTokenUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
+
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
 
@@ -41,6 +47,12 @@ public class UserService {
         }
 
         return jwtTokenUtils.generateAccessToken(username);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Alarm> getAllAlarm(String username, Pageable pageable) {
+        UserEntity userEntity = findByUsername(username);
+        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(Alarm::fromEntity);
     }
 
     public User loadUserByUsername(String username) {
