@@ -3,6 +3,7 @@ package minzdev.sns.model.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import minzdev.sns.model.entity.UserEntity;
+import minzdev.sns.model.enumeration.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
