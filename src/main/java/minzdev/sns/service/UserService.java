@@ -50,9 +50,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Alarm> getAllAlarm(String username, Pageable pageable) {
-        UserEntity userEntity = findByUsername(username);
-        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(Alarm::fromEntity);
+    public Page<Alarm> getAllAlarm(Integer userId, Pageable pageable) {
+        return alarmEntityRepository.findAllByUserId(userId, pageable).map(Alarm::fromEntity);
     }
 
     public User loadUserByUsername(String username) {

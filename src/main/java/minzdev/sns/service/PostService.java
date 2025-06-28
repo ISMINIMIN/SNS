@@ -59,9 +59,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Post> getMy(String username, Pageable pageable) {
-        UserEntity userEntity = userService.findByUsername(username);
-        return postEntityRepository.findAllByUser(userEntity, pageable).map(Post::fromEntity);
+    public Page<Post> getMy(Integer userId, Pageable pageable) {
+        return postEntityRepository.findAllByUserId(userId, pageable).map(Post::fromEntity);
     }
 
     public PostEntity findById(Integer postId) {
