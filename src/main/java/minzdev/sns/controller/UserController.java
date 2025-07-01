@@ -9,6 +9,7 @@ import minzdev.sns.controller.response.UserJoinResponse;
 import minzdev.sns.controller.response.UserLoginResponse;
 import minzdev.sns.model.dto.User;
 import minzdev.sns.service.UserService;
+import minzdev.sns.util.AuthUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -35,7 +36,8 @@ public class UserController {
 
     @GetMapping("/alarm")
     public Response<Page<AlarmResponse>> getAllAlarm(Pageable pageable, Authentication auth) {
-        return Response.success(userService.getAllAlarm(auth.getName(), pageable).map(AlarmResponse::from));
+        User user = AuthUtils.getUser(auth);
+        return Response.success(userService.getAllAlarm(user.getId(), pageable).map(AlarmResponse::from));
     }
 
 }

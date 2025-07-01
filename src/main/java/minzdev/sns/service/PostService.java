@@ -6,6 +6,8 @@ import minzdev.sns.exception.SnsApplicationException;
 import minzdev.sns.model.dto.Post;
 import minzdev.sns.model.entity.PostEntity;
 import minzdev.sns.model.entity.UserEntity;
+import minzdev.sns.repository.CommentEntityRepository;
+import minzdev.sns.repository.LikeEntityRepository;
 import minzdev.sns.repository.PostEntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,8 @@ public class PostService {
     private final UserService userService;
 
     private final PostEntityRepository postEntityRepository;
+    private final LikeEntityRepository likeEntityRepository;
+    private final CommentEntityRepository commentEntityRepository;
 
     @Transactional
     public void create(String title, String body, String username) {
@@ -50,6 +54,9 @@ public class PostService {
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", username, postId));
         }
 
+        likeEntityRepository.deleteAllByPost(postEntity);
+        commentEntityRepository.deleteAllByPost(postEntity);
+
         postEntityRepository.delete(postEntity);
     }
 
@@ -59,9 +66,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Post> getMy(String username, Pageable pageable) {
-        UserEntity userEntity = userService.findByUsername(username);
-        return postEntityRepository.findAllByUser(userEntity, pageable).map(Post::fromEntity);
+    public Page<Post> getMy(Integer userId, Pageable pageable) {
+        return postEntityRepository.findAllByUserId(userId, pageable).map(Post::fromEntity);
     }
 
     public PostEntity findById(Integer postId) {

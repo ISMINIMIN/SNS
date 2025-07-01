@@ -8,8 +8,10 @@ import minzdev.sns.controller.response.CommentResponse;
 import minzdev.sns.controller.response.PostResponse;
 import minzdev.sns.controller.response.Response;
 import minzdev.sns.model.dto.Post;
+import minzdev.sns.model.dto.User;
 import minzdev.sns.service.PostDetailService;
 import minzdev.sns.service.PostService;
+import minzdev.sns.util.AuthUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -48,7 +50,8 @@ public class PostController {
 
     @GetMapping("/my")
     public Response<Page<PostResponse>> getMy(Pageable pageable, Authentication auth) {
-        return Response.success(postService.getMy(auth.getName(), pageable).map(PostResponse::from));
+        User user = AuthUtils.getUser(auth);
+        return Response.success(postService.getMy(user.getId(), pageable).map(PostResponse::from));
     }
 
     @PostMapping("/{postId}/likes")
