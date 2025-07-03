@@ -28,8 +28,11 @@ public class AuthenticationConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web
                 .ignoring()
-                .requestMatchers(new RegexRequestMatcher("^(?!/api/).*", null))
-        ;
+                .requestMatchers(
+                        new RegexRequestMatcher("^(?!/api/).*", null),
+                        new RegexRequestMatcher("^/api/.*/users/join$", null),
+                        new RegexRequestMatcher("^/api/.*/users/login$", null)
+                );
     }
 
     @Bean
@@ -37,7 +40,6 @@ public class AuthenticationConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/*/users/join", "/api/*/users/login").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
