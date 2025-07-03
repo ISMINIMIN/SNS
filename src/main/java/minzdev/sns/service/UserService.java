@@ -7,6 +7,7 @@ import minzdev.sns.model.dto.Alarm;
 import minzdev.sns.model.dto.User;
 import minzdev.sns.model.entity.UserEntity;
 import minzdev.sns.repository.AlarmEntityRepository;
+import minzdev.sns.repository.UserCacheRepository;
 import minzdev.sns.repository.UserEntityRepository;
 import minzdev.sns.util.JwtTokenUtils;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ public class UserService {
 
     private final UserEntityRepository userEntityRepository;
     private final AlarmEntityRepository alarmEntityRepository;
+    private final UserCacheRepository userCacheRepository;
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
@@ -39,10 +41,11 @@ public class UserService {
     }
 
     public String login(String username, String password) {
-        UserEntity userEntity = findByUsername(username);
+        User user = loadUserByUsername(username);
+        userCacheRepository.setUser(user);
 
         // 비밀번호 일치 여부 체크
-        if(!passwordEncoder.matches(password, userEntity.getPassword())) {
+        if(!passwordEncoder.matches(password, user.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 
@@ -55,8 +58,9 @@ public class UserService {
     }
 
     public User loadUserByUsername(String username) {
-        return userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username)));
+        return userCacheRepository.getUser(username).orElseGet(() ->
+                userEntityRepository.findByUsername(username).map(User::fromEntity).orElseThrow(() ->
+                        new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", username))));
     }
 
     public UserEntity findByUsername(String username) {
