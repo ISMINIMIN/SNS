@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,18 +25,27 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final UserService userService;
     private final JwtTokenUtils jwtTokenUtils;
 
+    private final static List<String> TOKEN_IN_PARAM_URLS = List.of("/api/v1/users/alarm/subscribe");
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if(header == null || !header.startsWith("Bearer ")) {
-            log.error("[ERROR] occurs while getting header - header is null or invalid ({})", request.getRequestURL());
-            filterChain.doFilter(request, response);
-            return;
-        }
+        final String token;
 
         try {
-            final String token = header.split(" ")[1].trim();
+            if (TOKEN_IN_PARAM_URLS.contains(request.getRequestURI())) {
+                log.info("[TOKEN_IN_PARAM_URLS] Request with {} check the query param", request.getRequestURI());
+                token = request.getQueryString().split("=")[1].trim();
+            } else {
+                final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+                if(header == null || !header.startsWith("Bearer ")) {
+                    log.error("[ERROR] occurs while getting header - header is null or invalid ({})", request.getRequestURL());
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                token = header.split(" ")[1].trim();
+            }
 
             // 토큰 검증
             if(jwtTokenUtils.isExpired(token)) {
