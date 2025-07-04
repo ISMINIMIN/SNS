@@ -20,6 +20,7 @@ public class PostDetailService {
 
     private final UserService userService;
     private final PostService postService;
+    private final AlarmService alarmService;
 
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
@@ -36,9 +37,7 @@ public class PostDetailService {
             likeEntityRepository.delete(likeEntity.get());
         } else {
             likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
-            alarmEntityRepository.save(AlarmEntity.of(
-                    postEntity.getUser(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())
-            ));
+            sendAlarm(userEntity, postEntity, AlarmType.NEW_LIKE_ON_POST);
         }
     }
 
@@ -54,15 +53,20 @@ public class PostDetailService {
         PostEntity postEntity = postService.findById(postId);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
-        alarmEntityRepository.save(AlarmEntity.of(
-                postEntity.getUser(), AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())
-        ));
+        sendAlarm(userEntity, postEntity, AlarmType.NEW_COMMENT_ON_POST);
     }
 
     @Transactional(readOnly = true)
     public Page<Comment> getComments(Integer postId, Pageable pageable) {
         PostEntity postEntity = postService.findById(postId);
         return commentEntityRepository.findAllByPost(postEntity, pageable).map(Comment::fromEntity);
+    }
+
+    private void sendAlarm(UserEntity userEntity, PostEntity postEntity, AlarmType alarmType) {
+        AlarmEntity alarmEntity = alarmEntityRepository.save(AlarmEntity.of(
+                postEntity.getUser(), alarmType, new AlarmArgs(userEntity.getId(), postEntity.getId())
+        ));
+        alarmService.send(alarmEntity.getId(), postEntity.getUser().getId());
     }
 
 }
