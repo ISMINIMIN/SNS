@@ -8,12 +8,14 @@ import minzdev.sns.controller.response.Response;
 import minzdev.sns.controller.response.UserJoinResponse;
 import minzdev.sns.controller.response.UserLoginResponse;
 import minzdev.sns.model.dto.User;
+import minzdev.sns.service.AlarmService;
 import minzdev.sns.service.UserService;
 import minzdev.sns.util.AuthUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AlarmService alarmService;
 
     @PostMapping("/join")
     public Response<UserJoinResponse> join(@RequestBody UserJoinRequest request) {
@@ -38,6 +41,12 @@ public class UserController {
     public Response<Page<AlarmResponse>> getAllAlarm(Pageable pageable, Authentication auth) {
         User user = AuthUtils.getUser(auth);
         return Response.success(userService.getAllAlarm(user.getId(), pageable).map(AlarmResponse::from));
+    }
+
+    @GetMapping("/alarm/subscribe")
+    public SseEmitter subscribe(Authentication auth) {
+        User user = AuthUtils.getUser(auth);
+        return alarmService.connect(user.getId());
     }
 
 }
