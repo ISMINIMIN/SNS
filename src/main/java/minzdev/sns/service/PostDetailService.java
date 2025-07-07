@@ -1,10 +1,11 @@
 package minzdev.sns.service;
 
 import lombok.AllArgsConstructor;
+import minzdev.sns.kafka.producer.AlarmProducer;
 import minzdev.sns.model.dto.Comment;
 import minzdev.sns.model.entity.*;
 import minzdev.sns.model.enumeration.AlarmType;
-import minzdev.sns.repository.AlarmEntityRepository;
+import minzdev.sns.model.event.AlarmEvent;
 import minzdev.sns.repository.CommentEntityRepository;
 import minzdev.sns.repository.LikeEntityRepository;
 import org.springframework.data.domain.Page;
@@ -20,11 +21,11 @@ public class PostDetailService {
 
     private final UserService userService;
     private final PostService postService;
-    private final AlarmService alarmService;
+
+    private final AlarmProducer alarmProducer;
 
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
-    private final AlarmEntityRepository alarmEntityRepository;
 
     @Transactional
     public void like(Integer postId, String username) {
@@ -37,7 +38,7 @@ public class PostDetailService {
             likeEntityRepository.delete(likeEntity.get());
         } else {
             likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
-            sendAlarm(userEntity, postEntity, AlarmType.NEW_LIKE_ON_POST);
+            alarmProducer.send(new AlarmEvent(postEntity.getUser().getId(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
         }
     }
 
@@ -53,20 +54,13 @@ public class PostDetailService {
         PostEntity postEntity = postService.findById(postId);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
-        sendAlarm(userEntity, postEntity, AlarmType.NEW_COMMENT_ON_POST);
+        alarmProducer.send(new AlarmEvent(postEntity.getUser().getId(), AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
     }
 
     @Transactional(readOnly = true)
     public Page<Comment> getComments(Integer postId, Pageable pageable) {
         PostEntity postEntity = postService.findById(postId);
         return commentEntityRepository.findAllByPost(postEntity, pageable).map(Comment::fromEntity);
-    }
-
-    private void sendAlarm(UserEntity userEntity, PostEntity postEntity, AlarmType alarmType) {
-        AlarmEntity alarmEntity = alarmEntityRepository.save(AlarmEntity.of(
-                postEntity.getUser(), alarmType, new AlarmArgs(userEntity.getId(), postEntity.getId())
-        ));
-        alarmService.send(alarmEntity.getId(), postEntity.getUser().getId());
     }
 
 }

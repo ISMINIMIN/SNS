@@ -36,6 +36,7 @@ dependencies {
 	implementation 'org.hibernate:hibernate-core:6.3.0.Final'
 	implementation 'com.vladmihalcea:hibernate-types-60:2.21.0'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.kafka:spring-kafka'
 
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AlarmArgs {
 
-    private Integer fromUserId;
-    private Integer targetId;
+    private Integer senderUserId;
+    private Integer postId;
 
 }
